@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>재건축 노트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  :root{
+    --ground:#F5F7FA; --surface:#FFFFFF; --ink:#12233A; --body:#2C3B4E;
+    --muted:#5C6B7F; --rule:#DBE2EB; --rail:#C6D2E0;
+    --accent:#1E5F9E; --accent-soft:#E8F0F8;
+    --warn:#9A5B00; --warn-soft:#FBF1E0; --warn-rule:#E4C99A;
+    --serif:"Noto Serif KR",Georgia,serif;
+    --sans:"IBM Plex Sans KR",-apple-system,"Apple SD Gothic Neo",sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --ground:#0E1620; --surface:#151F2C; --ink:#E6EDF5; --body:#C3CEDB;
+    --muted:#8798AB; --rule:#26323F; --rail:#33445A;
+    --accent:#6FB0E8; --accent-soft:#16283A;
+    --warn:#E0A75B; --warn-soft:#2A2114; --warn-rule:#5A4726; }}
+  :root[data-theme="dark"]{
+    --ground:#0E1620; --surface:#151F2C; --ink:#E6EDF5; --body:#C3CEDB;
+    --muted:#8798AB; --rule:#26323F; --rail:#33445A;
+    --accent:#6FB0E8; --accent-soft:#16283A;
+    --warn:#E0A75B; --warn-soft:#2A2114; --warn-rule:#5A4726; }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--body);font-family:var(--sans);
+       font-size:17px;line-height:1.85;margin:0;padding:0 22px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding-block:0 88px}
+  h1,h2,h3{color:var(--ink);text-wrap:balance;margin:0}
+  a{color:var(--accent);text-underline-offset:3px}
+  .num{font-variant-numeric:tabular-nums}
+
+  header{border-bottom:2px solid var(--ink);padding-block:44px 16px}
+  .kicker{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(30px,7vw,42px);line-height:1.22;margin-top:10px}
+  .sub{font-size:15px;color:var(--muted);margin-top:12px}
+
+  nav{display:flex;flex-wrap:wrap;gap:4px;margin:26px 0 8px;
+      border-bottom:1px solid var(--rule);padding-bottom:0}
+  nav button{font-family:var(--sans);font-size:15.5px;font-weight:500;color:var(--muted);
+    background:none;border:0;border-bottom:2px solid transparent;
+    padding:10px 14px;cursor:pointer;margin-bottom:-1px}
+  nav button:hover{color:var(--ink)}
+  nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+  nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+  .panel{padding-top:26px}
+  .empty{color:var(--muted);font-size:15.5px;background:var(--surface);
+         border:1px dashed var(--rule);border-radius:4px;padding:22px}
+
+  /* 추이 */
+  .metric-pick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+  .metric-pick button{font-size:14px;font-family:var(--sans);color:var(--muted);
+    background:var(--surface);border:1px solid var(--rule);border-radius:999px;
+    padding:5px 14px;cursor:pointer}
+  .metric-pick button[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);
+    background:var(--accent-soft);font-weight:600}
+  .chart-box{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+             padding:18px 14px 10px;overflow-x:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;font-size:14px;color:var(--muted)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .pts{margin-top:24px;display:flex;flex-direction:column;gap:14px}
+  .pt{border-left:3px solid var(--rail);padding-left:14px;font-size:15px}
+  .pt b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .pt .q{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+  .chip{font-size:12.5px;font-weight:600;color:var(--warn);background:var(--warn-soft);
+        border:1px solid var(--warn-rule);border-radius:3px;padding:1px 7px;margin-left:6px}
+
+  /* 단지 */
+  .thread{background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+          padding:20px;margin-bottom:16px}
+  .thread h3{font-family:var(--serif);font-size:19px;font-weight:700}
+  .thread .meta{font-size:14px;color:var(--muted);margin-top:6px}
+  .thread ol{margin:14px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:15px}
+
+  /* 용어 */
+  .term{padding:14px 0;border-bottom:1px solid var(--rule);display:flex;
+        justify-content:space-between;gap:14px;align-items:baseline}
+  .term b{font-family:var(--serif);font-size:17px;color:var(--ink)}
+  .term span{font-size:14px;color:var(--muted);white-space:nowrap}
+
+  /* 지난 글 */
+  .archive{display:flex;flex-direction:column;gap:2px}
+  .archive button{text-align:left;font-family:var(--sans);font-size:16px;color:var(--accent);
+    background:none;border:0;border-bottom:1px solid var(--rule);padding:13px 2px;cursor:pointer}
+  .archive button[aria-pressed="true"]{color:var(--ink);font-weight:600}
+
+  /* 마크다운 본문 */
+  .md h1{display:none}
+  .md h2{font-family:var(--serif);font-size:15px;letter-spacing:.06em;color:var(--ink);
+         border-bottom:1px solid var(--rule);padding-bottom:9px;margin:44px 0 22px}
+  .md h3{font-family:var(--serif);font-size:21px;line-height:1.45;font-weight:500;margin:30px 0 0}
+  .md p{margin:14px 0 0}
+  .md blockquote{margin:16px 0 0;background:var(--warn-soft);border:1px solid var(--warn-rule);
+    border-left-width:4px;border-radius:3px;padding:13px 16px;font-size:15.5px;color:var(--body)}
+  .md blockquote p{margin:0}
+  .md table{border-collapse:collapse;width:100%;margin:16px 0 0;font-size:15px}
+  .md th,.md td{border:1px solid var(--rule);padding:8px 11px;text-align:left}
+  .md th{background:var(--accent-soft);color:var(--ink);font-weight:600}
+  .md td{font-variant-numeric:tabular-nums}
+  .md ol,.md ul{margin:14px 0 0;padding-left:22px;display:flex;flex-direction:column;gap:9px}
+  .md em{color:var(--muted);font-style:normal;font-size:15px}
+  .md hr{border:0;border-top:1px solid var(--rule);margin:34px 0}
+  .md > *:first-child{margin-top:0}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);
+         font-size:14px;line-height:1.8;color:var(--muted)}
+  @media (max-width:430px){ nav button{padding:9px 10px;font-size:14.5px} }
+</style>
+</head><body>
+<div class="wrap">
+<header>
+  <div class="kicker">노원 · 상계주공 우선</div>
+  <h1>재건축 노트</h1>
+  <div class="sub" id="sub"></div>
+</header>
+
+<nav role="tablist" id="tabs"></nav>
+<div id="panel" class="panel" role="tabpanel"></div>
+
+<footer>
+  수치는 모두 기사 원문에 실린 값이다. <span class="chip">전제 불명</span> 은 종전 면적·신청 평형이
+  기사에 없다는 뜻으로, 같은 단지라도 보유 면적에 따라 분담금은 크게 달라진다.<br>
+  이 페이지는 <code>python3 -m pipeline.site</code> 로 매일 다시 구워진다.
+</footer>
+</div>
+
+<script>
+const DATA = {"generated": "2026-09-16", "digests": [{"date": "2026-09-16", "markdown": "# 2026-09-16 재건축 비용 다이제스트\n\n## 오늘의 요약\n\n이날은 노원구·상계동 관련 소식이 정책·계약 두 갈래로 겹쳤다. 서울시 정비기본계획 변경으로 기부채납 용적률 인센티브가 확대되면서 노원구가 임대주택 비율 완화, 보정계수 상향 등 추가 개선을 건의했고, 상계2구역은 대우건설·동부건설과 총 6890억원 규모의 실제 공사계약을 체결했다. 동시에 목동4단지가 평당 1010만원으로 목동 재건축 사상 첫 '1000만원대' 공사비를 제시하며 인근 단지들의 공사비 책정 기준선이 될 가능성이 거론됐다. 서울 전역 건축비 편차가 최대 2.8배에 달한다는 분석도 나와, 조합원 입장에서 공사비·건축비 산정 기준 자체가 불투명하다는 점이 이날 흐름을 관통한다.\n\n## 선별 5건\n\n### 1. 🔴 [상계주공] 거래량 상위 10곳 중 7곳이 '노도강 구축'…경기는 수원 쏠림\n\n뉴시스 · 2026-09-15 · [원문](https://newsis.com/view/NISX20260915_0003790667)\n\n**핵심 수치**\n\n| 단지 | 항목 | 값 | 전제 |\n|---|---|---|---|\n| 상계주공 | 분담금 | 6억 | 전제 불명 — 참고용 |\n| 상계주공 | 분담금 | 7억 | 전제 불명 — 참고용 |\n\n서울 아파트 거래량 상위 10곳 중 7곳이 노원·도봉·강북구 구축 단지였으며, 상계주공7단지·10단지·3단지가 상위권에 포함됐다. 전문가는 상계주공의 재건축 추가 분담금이 6억~7억원 수준으로 거론된다고 언급했다. 강남권 진입장벽과 전월세난 속에 재건축 기대감이 있는 노후 대단지로 실수요가 몰리는 흐름이 확인됐다.\n\n> ⚠️ 6억~7억원은 상계주공 어느 평형, 어느 보유 면적을 기준으로 한 분담금인지 기사에 나와 있지 않습니다. 전제 불명인 수치이니 본인 보유 면적과 바로 연결해 읽지 않으시는 게 좋습니다.\n> ⚠️ 사업 단계도 명시돼 있지 않아, 이 금액이 추정 단계인지 확정 단계인지 알 수 없습니다.\n\n*왜 골랐나*: 상계주공 관련 분담금 수치(6억~7억원)가 전문가 발언으로 구체적으로 인용돼 최우선 지역 기준을 충족한다.\n\n### 2. 목동4단지, 목동서 처음으로 공사비 '평당 1010만원'…현대건설·포스코...\n\ntheguru.co.kr · 2026-09-15 · [원문](https://theguru.co.kr/news/article.html?no=107099)\n\n**핵심 수치**\n\n| 단지 | 항목 | 값 | 전제 |\n|---|---|---|---|\n| 목동신시가지4단지 | 평당공사비 | 1,010만원/3.3㎡ | — |\n| 목동신시가지4단지 | 총공사비 | 16,300억 | — |\n| 목동신시가지4단지 | 평당공사비 | 950만원/3.3㎡ | — |\n| 목동신시가지4단지 | 일반분양가 | 7,000만원 | — |\n\n목동4단지 조합이 제시한 총공사비 예정액은 약 1조6300억원, 3.3㎡당 1010만원으로 목동 신시가지 14개 구역 중 처음으로 평당 1000만원을 넘겼다. 앞서 시공사를 선정한 목동6·8·10·12단지는 모두 900만원대였다. 조합설립 당시 추정 분담금은 평당 공사비 950만원, 일반분양가 7000만원을 기준으로 산출됐으나 이후 공사비가 60만원가량 올랐다.\n\n> ⚠️ 950만원(조합설립인가 당시)과 1010만원(시공사선정공고)은 서로 다른 사업 단계의 평당공사비입니다. 두 수치를 나란히 놓고 '올랐다'고 볼 수는 있지만, 이 자체가 최종 확정치는 아닙니다.\n> ⚠️ 조합설립 당시 추정 분담금은 특정 종전 면적·신청 평형을 기준으로 산출된 것이 아니라 평당공사비·일반분양가라는 사업 전체 변수만 제시된 것입니다. 개별 조합원의 분담금은 이 두 수치만으로 계산되지 않습니다.\n> ⚠️ 총공사비 1조6300억원은 사업 전체 금액이며, 개별 조합원의 분담금과는 다른 수치입니다.\n\n*왜 골랐나*: 목동 재건축 사상 첫 평당 1000만원대 공사비라는 구체적 수치와, 조합설립 당시 대비 인상폭까지 함께 제시돼 분담금 추정에 직접 참고할 수 있는 기사다.\n\n### 3. 🔴 [노원구] 노원구, 기부채납 인센티브 '환영'...임대주택 비율 등 추가 개선 건의\n\nhg-times.com · 2026-09-15 · [원문](https://hg-times.com/news/articleView.html?idxno=305306)\n\n서울시가 공고한 2030 정비기본계획 변경안에 노원구가 건의해 온 기부채납 용적률 인센티브가 반영돼, 상한용적률을 초과하는 기부채납에도 인센티브가 인정된다. 월계삼호4차·중계그린 등이 그간 이 문제로 인센티브를 온전히 받지 못했다. 노원구는 추가로 재건축 임대주택 비율을 50%에서 30%로 완화하고, 사업성 보정계수 상한을 2.0에서 3.0으로 높여달라고 서울시에 건의했다.\n\n**정책 포인트**\n\n- 상한용적률 초과 기부채납에도 용적률 인센티브 인정 (2030 정비기본계획 변경)\n- 재건축 임대주택 비율 50%→30% 완화 건의\n- 사업성 보정계수 상한 2.0→3.0 확대 및 분양가격 보정계수 신설 건의\n\n*왜 골랐나*: 노원구 재건축 단지 전반의 사업성과 분담금에 영향을 주는 제도 변화이며, 우선순위 지역 기준에 해당한다.\n\n### 4. 🔴 [노원구] 대우건설·동부건설, 상계2구역 계약체결 공시\n\narunews.com · 2026-09-15 · [원문](https://arunews.com/news/articleView.html?idxno=67154)\n\n**핵심 수치**\n\n| 단지 | 항목 | 값 | 전제 |\n|---|---|---|---|\n| 상계2구역 | 총공사비 | 6,890억 4,500만원 | — |\n\n대우건설과 동부건설이 노원구 상계2구역 재개발 공사계약을 체결했다고 공시했다. 총 계약금액은 6890억4523만원으로 대우건설이 60%(4134억원), 동부건설이 40%(2756억원)를 맡는다. 계약기간은 실착공일로부터 42개월이며, 두 회사는 2021년 이미 시공자로 선정된 바 있다.\n\n> ⚠️ 이 기사의 총공사비 6890억원은 시공사 계약금액이며, 개별 조합원의 분담금과는 다른 성격의 수치입니다. 조합원별 분담금 정보는 이 기사에 없습니다.\n\n*왜 골랐나*: 노원구 상계동 사업장의 실제 공사계약 금액이 명시된 수치 기사다.\n\n### 5. 14억 vs 5억… 같은 국평인데 3배 차이나는 '고무줄 건축비' [부동산 아...\n\n파이낸셜뉴스 · 2026-09-15 · [원문](https://fnnews.com/news/202609151825213294)\n\n올해 서울 비분상제 12개 단지의 전용 84㎡ 분양가를 분석한 결과 건축비가 최고 14억1000만원(노량진6구역)에서 최저 5억1000만원(문래진주 재건축)까지 2.8배 차이가 났다. 총 분양가에서 건축비 비중도 29%~62%로 편차가 컸다. 업계 관계자는 층수·마감재·커뮤니티 시설 등 단지마다 기준이 달라 건축비를 일률 비교하기 어렵고, 분상제 미적용 지역은 건축비 산정 기준 자체가 모호하다고 지적했다.\n\n**정책 포인트**\n\n- 분양가상한제 미적용 지역은 건축비 산정에 대한 명확한 기준이 없다는 지적\n\n*왜 골랐나*: 재건축·재개발 단지 간 건축비 산정 기준이 얼마나 들쭉날쭉한지를 보여주는 정책적 함의가 있는 기사로, 분담금의 상당 부분을 차지하는 건축비 비중 문제를 짚었다.\n\n## 인사이트\n\n- 상계주공의 재건축 추가 분담금은 6억~7억원 수준으로 거론되지만, 종전 면적·신청 평형 등 전제가 없어 개별 조합원 부담과는 차이가 있을 수 있다.\n- 목동4단지는 평당 1010만원으로 목동 신시가지 14개 구역 중 처음으로 900만원대를 넘어섰으며, 조합설립 당시 추정치(950만원)보다 상승한 상태에서 시공사 선정 절차에 들어간다.\n- 노원구의 기부채납 용적률 인센티브 확대는 제도 시행 단계로, 실제 분담금 절감 효과는 개별 단지의 정비계획 변경 이후 확인이 필요하다.\n- 상계2구역 재개발은 이미 2021년 시공사가 선정된 사업으로, 이번 계약은 총 6890억원 규모의 공사도급계약 체결을 구체화한 것이다.\n- 서울 비분상제 단지의 건축비 비중이 29~62%까지 벌어진다는 점은, 분담금 산정 시 조합이 제시하는 건축비 근거를 꼼꼼히 따져야 함을 시사한다.\n\n## 오늘 흘려보낸 것\n\n중복 54건 · 후속보도 신규정보 없음 0건 · 기준 미달 438건\n"}], "facts": [{"date": "2026-09-16", "complex": "상계주공", "region": "노원구", "metric": "분담금", "value": 6.0, "unit": "억원", "stage": null, "quote": "상계주공의 경우 추가 분담금이 6억~7억으로 거론되고 있음에도 노원역 일대의 뛰어난 교통과 상권, 병원 등 우수한 인프라를 갖추고 있어 실수요자들의 진입이 이어지고 있다", "url": "https://newsis.com/view/NISX20260915_0003790667", "thread_id": "sanggye-6", "ambiguous": true}, {"date": "2026-09-16", "complex": "상계주공", "region": "노원구", "metric": "분담금", "value": 7.0, "unit": "억원", "stage": null, "quote": "상계주공의 경우 추가 분담금이 6억~7억으로 거론되고 있음에도 노원역 일대의 뛰어난 교통과 상권, 병원 등 우수한 인프라를 갖추고 있어 실수요자들의 진입이 이어지고 있다", "url": "https://newsis.com/view/NISX20260915_0003790667", "thread_id": "sanggye-6", "ambiguous": true}, {"date": "2026-09-16", "complex": "목동신시가지4단지", "region": "양천구", "metric": "일반분양가", "value": 7000.0, "unit": "만원", "stage": "조합설립인가", "quote": "조합 설립 당시 추정 분담금은 3.3㎡당 공사비 950만원, 일반분양가 7000만원을 기준으로 산출됐다", "url": "https://theguru.co.kr/news/article.html?no=107099", "thread_id": "mokdong-4", "ambiguous": false}, {"date": "2026-09-16", "complex": "목동신시가지4단지", "region": "양천구", "metric": "총공사비", "value": 16300.0, "unit": "억원", "stage": "시공사선정공고", "quote": "목동4단지 재건축 조합이 제시한 총공사비 예정액은 약 1조6300억원으로, 3.3㎡당 1010만원 수준이다.", "url": "https://theguru.co.kr/news/article.html?no=107099", "thread_id": "mokdong-4", "ambiguous": false}, {"date": "2026-09-16", "complex": "상계2구역", "region": "노원구", "metric": "총공사비", "value": 6890.45, "unit": "억원", "stage": null, "quote": "계약금액은 총 6,890억4,523만4,031원으로 대우건설은 4,134억2,714만419원(60%)이고 동부건설은 2,756억1,809만3,612원(40%)다.", "url": "https://arunews.com/news/articleView.html?idxno=67154", "thread_id": null, "ambiguous": false}, {"date": "2026-09-16", "complex": "목동신시가지4단지", "region": "양천구", "metric": "평당공사비", "value": 1010.0, "unit": "만원/3.3㎡", "stage": "시공사선정공고", "quote": "목동4단지 재건축 조합이 제시한 총공사비 예정액은 약 1조6300억원으로, 3.3㎡당 1010만원 수준이다.", "url": "https://theguru.co.kr/news/article.html?no=107099", "thread_id": "mokdong-4", "ambiguous": false}, {"date": "2026-09-16", "complex": "목동신시가지4단지", "region": "양천구", "metric": "평당공사비", "value": 950.0, "unit": "만원/3.3㎡", "stage": "조합설립인가", "quote": "조합 설립 당시 추정 분담금은 3.3㎡당 공사비 950만원, 일반분양가 7000만원을 기준으로 산출됐다", "url": "https://theguru.co.kr/news/article.html?no=107099", "thread_id": "mokdong-4", "ambiguous": false}], "threads": [{"id": "sanggye-6", "title": "거래량 상위 10곳 중 7곳이 '노도강 구축'…경기는 수원 쏠림", "known_facts": ["2026-09-16 · 서울 아파트 거래량 상위 10곳 중 7곳이 노원·도봉·강북구 구축 단지였으며, 상계주공7단지·10단지·3단지가 상위권에 포함됐다. 전문가는 상계주공의 재건축 추가 분담금이 6억~7억원 수준으로 거론된다고 언급했다.…"], "last_seen": "2026-09-16", "count": 1}, {"id": "mokdong-4", "title": "목동4단지, 목동서 처음으로 공사비 '평당 1010만원'…현대건설·포스코...", "known_facts": ["2026-09-16 · 목동4단지 조합이 제시한 총공사비 예정액은 약 1조6300억원, 3.3㎡당 1010만원으로 목동 신시가지 14개 구역 중 처음으로 평당 1000만원을 넘겼다. 앞서 시공사를 선정한 목동6·8·10·12단지는 모두 …"], "last_seen": "2026-09-16", "count": 1}], "terms": []};
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+/* 금액 단위가 섞이면 선이 의미를 잃는다. metric+unit 을 하나의 계열로 본다. */
+const seriesKey = f => `${f.metric} (${f.unit})`;
+const PALETTE = ["#1E5F9E","#8C2F39","#2E7D5B","#9A5B00","#5B4B8A","#2A6F7A"];
+
+function fmt(n){
+  return Number.isInteger(n) ? n.toLocaleString("ko-KR")
+                             : n.toLocaleString("ko-KR",{maximumFractionDigits:2});
+}
+
+/* ── 추이 ── */
+let pickedMetric = null;
+function renderTrend(){
+  const facts = DATA.facts;
+  if(!facts.length) return `<div class="empty">아직 쌓인 수치가 없습니다.
+    다이제스트가 며칠 발행되면 여기에 평당공사비·분담금 추이가 그려집니다.</div>`;
+
+  const metrics = [...new Set(facts.map(f=>f.metric))];
+  if(!pickedMetric || !metrics.includes(pickedMetric)) pickedMetric = metrics[0];
+  const rows = facts.filter(f=>f.metric===pickedMetric);
+
+  const picker = `<div class="metric-pick">${metrics.map(m=>
+    `<button type="button" data-metric="${esc(m)}" aria-pressed="${m===pickedMetric}">${esc(m)}</button>`
+  ).join("")}</div>`;
+
+  const groups = {};
+  rows.forEach(f=>{ (groups[seriesKey(f)] ||= []).push(f); });
+  const keys = Object.keys(groups);
+  const dates = [...new Set(rows.map(f=>f.date))].sort();
+  const vals = rows.map(f=>f.value);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if(lo===hi){ lo = lo*0.9 || 0; hi = hi*1.1 || 1; }
+  const pad = (hi-lo)*0.12; lo -= pad; hi += pad;
+
+  const W=660,H=280,L=78,R=18,T=18,B=44;
+  const px = d => dates.length<2 ? L+(W-L-R)/2
+            : L + (dates.indexOf(d)/(dates.length-1))*(W-L-R);
+  const py = v => T + (1-(v-lo)/(hi-lo))*(H-T-B);
+
+  const ticks = [0,.25,.5,.75,1].map(t=>{
+    const v = lo+(hi-lo)*t, y = py(v);
+    return `<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="var(--rule)" stroke-width="1"/>
+      <text x="${L-9}" y="${y+4}" text-anchor="end" font-size="12" fill="var(--muted)">${fmt(Math.round(v))}</text>`;
+  }).join("");
+
+  const lines = keys.map((k,i)=>{
+    const c = PALETTE[i%PALETTE.length];
+    const pts = groups[k].slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+    const path = pts.map((f,j)=>`${j?"L":"M"}${px(f.date).toFixed(1)},${py(f.value).toFixed(1)}`).join(" ");
+    const dots = pts.map(f=>`<circle cx="${px(f.date).toFixed(1)}" cy="${py(f.value).toFixed(1)}" r="4.5"
+      fill="${c}"><title>${esc(f.complex)} ${fmt(f.value)}${esc(f.unit)} (${esc(f.date)})</title></circle>`).join("");
+    return `<path d="${path}" fill="none" stroke="${c}" stroke-width="2"
+      ${pts.some(p=>p.ambiguous)?'stroke-dasharray="5 4"':""}/>${dots}`;
+  }).join("");
+
+  const xlab = dates.map(d=>`<text x="${px(d).toFixed(1)}" y="${H-16}" text-anchor="middle"
+    font-size="12" fill="var(--muted)">${esc(d.slice(5))}</text>`).join("");
+
+  const legend = keys.map((k,i)=>
+    `<span><i style="background:${PALETTE[i%PALETTE.length]}"></i>${esc(k)}</span>`).join("");
+
+  const pts = rows.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(f=>`
+    <div class="pt"><b>${fmt(f.value)}${esc(f.unit)}</b> · ${esc(f.complex)}
+      ${f.stage?` · ${esc(f.stage)}`:""}${f.ambiguous?'<span class="chip">전제 불명</span>':""}
+      <span class="q">${esc(f.date)} · ${esc((f.quote||"").slice(0,110))}${(f.quote||"").length>110?"…":""}
+      ${f.url?` <a href="${esc(f.url)}">원문</a>`:""}</span></div>`).join("");
+
+  return picker + `<div class="chart-box">
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img"
+         aria-label="${esc(pickedMetric)} 추이">${ticks}${lines}${xlab}</svg>
+    </div><div class="legend">${legend}</div><div class="pts">${pts}</div>`;
+}
+
+/* ── 단지 ── */
+function renderThreads(){
+  if(!DATA.threads.length) return `<div class="empty">아직 추적 중인 단지가 없습니다.</div>`;
+  return DATA.threads.map(t=>`<div class="thread">
+    <h3>${esc(t.title)}</h3>
+    <div class="meta">${esc(t.id)} · 기사 ${t.count}건 · 최근 ${esc(t.last_seen||"-")}</div>
+    <ol>${t.known_facts.map(f=>`<li>${esc(f)}</li>`).join("")}</ol></div>`).join("");
+}
+
+/* ── 용어 ── */
+function renderTerms(){
+  if(!DATA.terms.length) return `<div class="empty">아직 정리된 개념이 없습니다.
+    다이제스트의 <b>오늘의 개념</b> 에서 설명한 용어가 여기 쌓입니다.</div>`;
+  return DATA.terms.map(t=>`<div class="term"><b>${esc(t.term)}</b>
+    <span>${esc(t.first||"")}${t.count>1?` · ${t.count}회`:""}</span></div>`).join("");
+}
+
+/* ── 다이제스트 ── */
+let pickedDate = null;
+function md(src){ return marked.parse(src, {gfm:true, breaks:false}); }
+function renderToday(){
+  if(!DATA.digests.length) return `<div class="empty">아직 발행된 다이제스트가 없습니다.</div>`;
+  return `<div class="md">${md(DATA.digests[0].markdown)}</div>`;
+}
+function renderArchive(){
+  if(!DATA.digests.length) return `<div class="empty">아직 발행된 다이제스트가 없습니다.</div>`;
+  if(!pickedDate) pickedDate = DATA.digests[0].date;
+  const list = `<div class="archive">${DATA.digests.map(d=>
+    `<button type="button" data-date="${d.date}" aria-pressed="${d.date===pickedDate}">${d.date}</button>`
+  ).join("")}</div>`;
+  const doc = DATA.digests.find(d=>d.date===pickedDate);
+  return list + `<div class="md" style="margin-top:32px">${md(doc.markdown)}</div>`;
+}
+
+const TABS = [
+  ["오늘",  renderToday],
+  ["추이",  renderTrend],
+  ["단지",  renderThreads],
+  ["용어",  renderTerms],
+  ["지난 글", renderArchive],
+];
+let active = 0;
+
+function draw(){
+  $("#tabs").innerHTML = TABS.map(([name],i)=>
+    `<button type="button" role="tab" data-i="${i}" aria-selected="${i===active}">${name}</button>`).join("");
+  $("#panel").innerHTML = TABS[active][1]();
+}
+
+document.addEventListener("click", e=>{
+  const tab = e.target.closest("#tabs button");
+  if(tab){ active = +tab.dataset.i; draw(); return; }
+  const m = e.target.closest("[data-metric]");
+  if(m){ pickedMetric = m.dataset.metric; draw(); return; }
+  const d = e.target.closest("[data-date]");
+  if(d){ pickedDate = d.dataset.date; draw(); }
+});
+
+$("#sub").textContent =
+  `${DATA.generated} 기준 · 다이제스트 ${DATA.digests.length}건 · 누적 수치 ${DATA.facts.length}건 · 추적 단지 ${DATA.threads.length}곳`;
+draw();
+</script>
+</body></html>
